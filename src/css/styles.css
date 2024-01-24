@@ -148,3 +148,22 @@ button:hover {
   }
 }
 
+#loadMoreButton {
+  display: none;
+  /* Изначально скрываем кнопку */
+  text-align: center;
+  margin: 20px auto;
+  height: 30px;
+  width: 300px;
+  /* Ширина кнопки, можете настроить по вашему вкусу */
+  background-color: #4E75FF;
+  color: white;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#loadMoreButton button:hover {
+  background-color: #6C8CFF;
+}
