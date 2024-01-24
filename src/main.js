@@ -7,13 +7,14 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 const gallery = document.getElementById("gallery");
-const loadMoreButton = document.getElementById("loadMoreButton"); // Добавлено получение кнопки
+const loadMoreButton = document.getElementById("loadMoreButton");
 
 const apiKey = "41962828-ff4c1ad2c8e7f95d6127e6141";
 const baseUrl = "https://pixabay.com/api/";
 
 const perPage = 40;
 let currentPage = 1;
+let firstLoad = true;
 
 const lightbox = new SimpleLightbox('.gallery a', {
   captions: true,
@@ -23,6 +24,15 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionPosition: 'bottom',
   animationSlide: false,
 });
+
+const cardHeight = () => {
+  const firstCard = document.querySelector('.gallery a');
+  if (firstCard) {
+    const rect = firstCard.getBoundingClientRect();
+    return rect.height;
+  }
+  return 0;
+};
 
 function showLoader() {
   const loader = document.createElement('span');
@@ -54,10 +64,25 @@ function hideLoadMoreButton() {
   loadMoreButton.style.display = "none";
 }
 
+function showEndMessage() {
+  iziToast.info({
+    title: "Info",
+    message: "We're sorry, but you've reached the end of search results.",
+    position: "topCenter",
+  });
+}
+
+function clearGallery() {
+  gallery.innerHTML = "";
+}
+
 async function fetchData(searchTerm) {
   try {
     showLoadingNotification();
     showLoader();
+
+    // Очищаем галерею перед новым запросом
+    clearGallery();
 
     const response = await fetch(`${baseUrl}?key=${apiKey}&q=${searchTerm}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=${perPage}`);
     const data = await response.json();
@@ -67,6 +92,11 @@ async function fetchData(searchTerm) {
     if (data.hits.length === 0) {
       iziToast.info({ title: "Info", message: "Sorry, there are no images matching your search query. Please try again!" });
     } else {
+      if (!gallery) {
+        console.error("Error fetching images: Gallery element is null");
+        return;
+      }
+
       data.hits.forEach(image => {
         const imageLink = document.createElement("a");
         imageLink.href = image.largeImageURL;
@@ -105,8 +135,20 @@ async function fetchData(searchTerm) {
 
       if (currentPage * perPage >= data.totalHits) {
         hideLoadMoreButton();
+        showEndMessage();
       } else {
         showLoadMoreButton();
+        if (!firstLoad) {
+          const scrollHeight = cardHeight();
+          if (scrollHeight > 0) {
+            window.scroll({
+              top: window.scrollY + scrollHeight * 2,
+              behavior: 'smooth'
+            });
+          }
+        } else {
+          firstLoad = false;
+        }
       }
     }
   } catch (error) {
@@ -126,6 +168,7 @@ searchForm.addEventListener("submit", function (e) {
   }
 
   currentPage = 1;
+  firstLoad = true;
   fetchData(searchTerm);
 });
 
