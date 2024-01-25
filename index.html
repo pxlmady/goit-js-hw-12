@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="stylesheet" href="simplelightbox.min.css">
+  <link rel="stylesheet" href="iziToast.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+  <title>Gallery</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="module" crossorigin src="/goit-js-hw-11/commonHelpers.js"></script>
+  <link rel="modulepreload" crossorigin href="/goit-js-hw-11/assets/vendor-46aac873.js">
+  <link rel="stylesheet" href="/goit-js-hw-11/assets/vendor-eb6030bc.css">
+  <link rel="stylesheet" href="/goit-js-hw-11/assets/index-36ee279e.css">
+</head>
+
+<body>
+  <div class="search-container">
+    <form id="searchForm">
+      <input type="text" id="searchInput" placeholder="Search images...">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  <div id="gallery" class="gallery"></div>
+
+  <button id="loadMoreButton" style="display: none;">Load more</button>
+
+  
+  <script src="simple-lightbox.min.js"></script>
+  <script src="iziToast.min.js" type="text/javascript"></script>
+</body>
+
+</html>
