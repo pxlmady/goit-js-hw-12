@@ -1,21 +1,25 @@
-// main.js
+// Імпортуємо необхідні бібліотеки та стилі
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const searchForm = document.getElementById("searchForm");
-const searchInput = document.getElementById("searchInput");
-const gallery = document.getElementById("gallery");
-const loadMoreButton = document.getElementById("loadMoreButton");
+// Отримуємо посилання на необхідні DOM-елементи
+const searchForm = document.getElementById("searchForm"); // Форма пошуку
+const searchInput = document.getElementById("searchInput"); // Поле введення пошукового запиту
+const gallery = document.getElementById("gallery"); // Галерея зображень
+const loadMoreButton = document.getElementById("loadMoreButton"); // Кнопка "Load more"
 
+// Ключ API та базовий URL для запитів до Pixabay API
 const apiKey = "41962828-ff4c1ad2c8e7f95d6127e6141";
 const baseUrl = "https://pixabay.com/api/";
 
+// Кількість зображень на сторінці та поточна сторінка
 const perPage = 40;
 let currentPage = 1;
 let firstLoad = true;
 
+// Ініціалізація lightbox для відображення зображень
 const lightbox = new SimpleLightbox('.gallery a', {
   captions: true,
   captionSelector: 'img',
@@ -25,21 +29,14 @@ const lightbox = new SimpleLightbox('.gallery a', {
   animationSlide: false,
 });
 
-const cardHeight = () => {
-  const firstCard = document.querySelector('.gallery a');
-  if (firstCard) {
-    const rect = firstCard.getBoundingClientRect();
-    return rect.height;
-  }
-  return 0;
-};
-
+// Функція для показу завантажувача
 function showLoader() {
   const loader = document.createElement('span');
   loader.classList.add('loader');
   document.body.appendChild(loader);
 }
 
+// Функція для приховання завантажувача
 function hideLoader() {
   const loader = document.querySelector('.loader');
   if (loader) {
@@ -47,6 +44,7 @@ function hideLoader() {
   }
 }
 
+// Функція для показу сповіщення про завантаження
 function showLoadingNotification() {
   iziToast.info({
     title: "Info",
@@ -56,14 +54,17 @@ function showLoadingNotification() {
   });
 }
 
+// Функція для показу кнопки "Load more"
 function showLoadMoreButton() {
   loadMoreButton.style.display = "block";
 }
 
+// Функція для приховування кнопки "Load more"
 function hideLoadMoreButton() {
   loadMoreButton.style.display = "none";
 }
 
+// Функція для показу повідомлення про завершення результатів пошуку
 function showEndMessage() {
   iziToast.info({
     title: "Info",
@@ -72,17 +73,16 @@ function showEndMessage() {
   });
 }
 
+// Функція для очищення галереї
 function clearGallery() {
   gallery.innerHTML = "";
 }
 
+// Функція для асинхронного отримання та відображення даних
 async function fetchData(searchTerm) {
   try {
     showLoadingNotification();
     showLoader();
-
-    // Очищаем галерею перед новым запросом
-    clearGallery();
 
     const response = await fetch(`${baseUrl}?key=${apiKey}&q=${searchTerm}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=${perPage}`);
     const data = await response.json();
@@ -96,6 +96,8 @@ async function fetchData(searchTerm) {
         console.error("Error fetching images: Gallery element is null");
         return;
       }
+
+      const imagesToAdd = [];
 
       data.hits.forEach(image => {
         const imageLink = document.createElement("a");
@@ -128,6 +130,11 @@ async function fetchData(searchTerm) {
 
         imageLink.appendChild(imgElement);
         imageLink.appendChild(detailsContainer);
+        
+        imagesToAdd.push(imageLink);
+      });
+
+      imagesToAdd.forEach(imageLink => {
         gallery.appendChild(imageLink);
       });
 
@@ -139,13 +146,10 @@ async function fetchData(searchTerm) {
       } else {
         showLoadMoreButton();
         if (!firstLoad) {
-          const scrollHeight = cardHeight();
-          if (scrollHeight > 0) {
-            window.scroll({
-              top: window.scrollY + scrollHeight * 2,
-              behavior: 'smooth'
-            });
-          }
+          // Получаем высоту одной карточки галереи
+          const cardHeight = gallery.lastElementChild.getBoundingClientRect().height;
+          // Прокручиваем страницу на высоту двух карточек галереи
+          window.scrollBy({ top: cardHeight * 2, behavior: 'smooth' });
         } else {
           firstLoad = false;
         }
@@ -158,6 +162,7 @@ async function fetchData(searchTerm) {
   }
 }
 
+// Додамо подію відправки форми для пошуку
 searchForm.addEventListener("submit", function (e) {
   e.preventDefault();
   const searchTerm = searchInput.value.trim();
@@ -169,9 +174,11 @@ searchForm.addEventListener("submit", function (e) {
 
   currentPage = 1;
   firstLoad = true;
+  clearGallery();
   fetchData(searchTerm);
 });
 
+// Додамо подію кліку на кнопці "Load more"
 loadMoreButton.addEventListener("click", function () {
   currentPage++;
   fetchData(searchInput.value.trim());
